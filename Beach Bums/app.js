@@ -649,16 +649,23 @@ function renderAlerts(alerts) {
 
   els.alertsList.className = "alerts-list";
   els.alertsList.innerHTML = displayAlerts.slice(0, 5).map((alert) => {
-    const alertUrl = alert.id || alert.properties.uri || alert.properties["@id"];
-    const content = `
-      <strong>${escapeHtml(alert.properties.event || "Weather alert")}</strong>
-      <p>${escapeHtml(alert.properties.headline || alert.properties.description || "Open NWS for details.")}</p>
-      <span class="alert-link-label">View official NWS alert</span>
-    `;
+    const event = alert.properties.event || "Weather alert";
+    const headline = alert.properties.headline || "Open for NWS alert details.";
+    const description = alert.properties.description || "No detailed description provided.";
+    const instruction = alert.properties.instruction || "No additional instructions provided.";
 
-    return alertUrl
-      ? `<a class="alert-item" href="${escapeHtml(alertUrl)}" target="_blank" rel="noopener noreferrer">${content}</a>`
-      : `<div class="alert-item">${content}</div>`;
+    return `
+      <details class="alert-item">
+        <summary>
+          <strong>${escapeHtml(event)}</strong>
+          <span>${escapeHtml(headline)}</span>
+        </summary>
+        <div class="alert-expanded">
+          <p>${escapeHtml(description)}</p>
+          <p><strong>Instructions:</strong> ${escapeHtml(instruction)}</p>
+        </div>
+      </details>
+    `;
   }).join("");
 }
 
