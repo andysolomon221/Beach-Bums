@@ -552,7 +552,7 @@ async function getWaterTemperature(station) {
 function renderWeather(weather) {
   const props = weather.observation?.properties;
   const tempF = cToF(props?.temperature?.value);
-  const windMph = msToMph(props?.windSpeed?.value);
+  const windMph = speedToMph(props?.windSpeed);
   const windDirection = degreesToCompass(props?.windDirection?.value);
   const fallbackPeriod = weather.forecast?.properties?.periods?.[0];
 
@@ -591,13 +591,26 @@ function renderDayForecast(periods) {
 
   const nightPeriod = periods.find((item) => !item.isDaytime);
   const rainChance = period.probabilityOfPrecipitation?.value;
-  els.forecastPeriod.textContent = period.name || "Today";
+  els.forecastPeriod.textContent = forecastPeriodLabel(period);
   els.forecastSummary.textContent = period.shortForecast || "Forecast available";
   els.forecastDetail.textContent = period.detailedForecast || "No detailed forecast provided.";
   els.forecastTemp.textContent = `${period.temperature}°${period.temperatureUnit}`;
   els.forecastLow.textContent = nightPeriod ? `${nightPeriod.temperature}°${nightPeriod.temperatureUnit}` : "--";
   els.forecastWind.textContent = `${period.windSpeed || "--"}${period.windDirection ? ` ${period.windDirection}` : ""}`;
   els.forecastRain.textContent = Number.isFinite(Number(rainChance)) ? `${rainChance}%` : "--";
+}
+
+function forecastPeriodLabel(period) {
+  const periodName = period.name || "Forecast";
+  const start = period.startTime ? new Date(period.startTime) : null;
+  if (!start || Number.isNaN(start.getTime())) return periodName;
+
+  const dateLabel = start.toLocaleDateString([], {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
+  return periodName + " - " + dateLabel;
 }
 
 function renderWaterTemp(reading, station) {
@@ -809,9 +822,17 @@ function cToF(celsius) {
   return Number.isFinite(value) ? (value * 9 / 5) + 32 : null;
 }
 
-function msToMph(ms) {
-  const value = Number(ms);
-  return Number.isFinite(value) ? value * 2.23694 : null;
+function speedToMph(speed) {
+  const value = Number(speed?.value);
+  if (!Number.isFinite(value)) return null;
+
+  const unit = speed?.unitCode || "";
+  if (unit.includes("km_h-1")) return value * 0.621371;
+  if (unit.includes("m_s-1")) return value * 2.23694;
+  if (unit.includes("kt")) return value * 1.15078;
+  if (unit.includes("mi_h-1")) return value;
+
+  return value;
 }
 
 function degreesToCompass(degrees) {
