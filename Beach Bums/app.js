@@ -648,12 +648,18 @@ function renderAlerts(alerts) {
   }
 
   els.alertsList.className = "alerts-list";
-  els.alertsList.innerHTML = displayAlerts.slice(0, 5).map((alert) => `
-    <div class="alert-item">
+  els.alertsList.innerHTML = displayAlerts.slice(0, 5).map((alert) => {
+    const alertUrl = alert.id || alert.properties.uri || alert.properties["@id"];
+    const content = `
       <strong>${escapeHtml(alert.properties.event || "Weather alert")}</strong>
       <p>${escapeHtml(alert.properties.headline || alert.properties.description || "Open NWS for details.")}</p>
-    </div>
-  `).join("");
+      <span class="alert-link-label">View official NWS alert</span>
+    `;
+
+    return alertUrl
+      ? `<a class="alert-item" href="${escapeHtml(alertUrl)}" target="_blank" rel="noopener noreferrer">${content}</a>`
+      : `<div class="alert-item">${content}</div>`;
+  }).join("");
 }
 
 function renderStations(place, stations) {
