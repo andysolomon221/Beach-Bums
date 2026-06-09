@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Beach Bums</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="search-panel" aria-labelledby="app-title">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">Live coast check</p>
+            <h1 id="app-title">Beach Bums</h1>
+          </div>
+          <button id="settings-button" class="icon-button" type="button" title="API settings" aria-label="API settings">
+            <span aria-hidden="true">⚙</span>
+          </button>
+        </div>
+
+        <form id="search-form" class="search-form">
+          <label for="search-input">Town, ZIP code, or beach name</label>
+          <div class="search-row">
+            <div class="search-combobox">
+              <input id="search-input" name="search" type="search" autocomplete="off" placeholder="Cape May Beach, NJ" role="combobox" aria-expanded="false" aria-controls="suggestions-list" aria-autocomplete="list" required>
+              <button id="clear-search" class="clear-search" type="button" aria-label="Clear search" hidden>×</button>
+              <div id="suggestions-list" class="suggestions-list" role="listbox" hidden></div>
+            </div>
+            <button class="search-submit" type="submit">Search</button>
+          </div>
+        </form>
+
+        <div class="quick-picks" aria-label="Sample beaches">
+          <button type="button" data-place="Cape May Beach, NJ">Cape May</button>
+          <button type="button" data-place="Myrtle Beach, SC">Myrtle Beach</button>
+          <button type="button" data-place="La Jolla Shores, CA">La Jolla</button>
+          <button type="button" data-place="Cannon Beach, OR">Cannon Beach</button>
+        </div>
+
+        <div id="status" class="status" role="status">Search a beach to load current conditions.</div>
+      </section>
+
+      <section class="map-panel" aria-label="Map">
+        <div id="map" class="map">
+          <div class="map-fallback">
+            <p>Map preview appears here.</p>
+            <span>Add a Google Maps browser key in settings for an interactive map.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="conditions-grid" aria-label="Current beach conditions">
+        <article class="metric-card">
+          <span class="metric-label">Outdoor Temp</span>
+          <strong id="air-temp">--</strong>
+          <small id="air-source">Nearest NWS station</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Water Temp</span>
+          <strong id="water-temp">--</strong>
+          <small id="water-source">Nearest NOAA sensor</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Wind</span>
+          <strong id="wind">--</strong>
+          <small id="wind-source">Speed and direction</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Risk Notes</span>
+          <strong id="risk-count">--</strong>
+          <small id="risk-source">NWS active alerts</small>
+        </article>
+      </section>
+
+      <section class="forecast-panel" aria-labelledby="forecast-title">
+        <div class="panel-heading">
+          <h2 id="forecast-title">Today's Weather</h2>
+          <span id="forecast-period">NWS forecast</span>
+        </div>
+        <div class="forecast-body">
+          <div>
+            <span class="metric-label">Day Forecast</span>
+            <strong id="forecast-summary">--</strong>
+            <p id="forecast-detail">Search a beach to load the day's weather report.</p>
+          </div>
+          <dl class="forecast-meta">
+            <div>
+              <dt>High</dt>
+              <dd id="forecast-temp">--</dd>
+            </div>
+            <div>
+              <dt>Tonight Low</dt>
+              <dd id="forecast-low">--</dd>
+            </div>
+            <div>
+              <dt>Wind</dt>
+              <dd id="forecast-wind">--</dd>
+            </div>
+            <div>
+              <dt>Rain</dt>
+              <dd id="forecast-rain">--</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="detail-layout">
+        <article class="tide-panel">
+          <div class="panel-heading">
+            <h2>Today's Tides</h2>
+            <span id="tide-station">NOAA station pending</span>
+          </div>
+          <div id="tide-list" class="tide-list empty-state">No tide data loaded yet.</div>
+        </article>
+
+        <article class="alerts-panel">
+          <div class="panel-heading">
+            <h2>Water Conditions</h2>
+            <span id="alert-region">NWS point alerts</span>
+          </div>
+          <div id="alerts-list" class="alerts-list empty-state">No alerts loaded yet.</div>
+        </article>
+      </section>
+
+      <details class="source-disclosure">
+        <summary>Data sources</summary>
+        <p id="station-summary">The app automatically uses the nearest NOAA tide and water-temperature stations for the selected beach.</p>
+        <dl class="source-list">
+          <div>
+            <dt>Location</dt>
+            <dd id="location-label">--</dd>
+          </div>
+          <div>
+            <dt>Tides</dt>
+            <dd id="tide-station-detail">--</dd>
+          </div>
+          <div>
+            <dt>Water temp</dt>
+            <dd id="water-station-detail">--</dd>
+          </div>
+        </dl>
+      </details>
+    </main>
+
+    <dialog id="settings-dialog">
+      <form method="dialog" class="settings-card">
+        <div class="panel-heading">
+          <h2>API Settings</h2>
+          <button class="icon-button" value="cancel" type="submit" aria-label="Close settings">×</button>
+        </div>
+        <label for="google-key">Google Maps browser API key</label>
+        <input id="google-key" type="password" placeholder="AIza...">
+        <p id="key-status" class="settings-note">No Google Maps key saved for this browser origin.</p>
+        <p class="settings-note">Enable Maps JavaScript API and Places API in Google Cloud. The key is stored only in this browser's local storage.</p>
+        <menu>
+          <button id="clear-key" type="button">Clear</button>
+          <button id="save-key" value="default" type="submit">Save</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script src="./config.js"></script>
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
