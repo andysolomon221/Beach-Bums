@@ -397,10 +397,8 @@ async function searchBeach(query) {
       getAlerts(place),
     ]);
 
-    const [tides, waterTemp] = await Promise.all([
-      getTidePredictions(stations.tide),
-      getWaterTemperature(stations.water),
-    ]);
+    const tides = await getTidePredictions(stations.tide);
+    const waterTemp = stations.waterTemp;
 
     renderWeather(weather);
     renderWaterTemp(waterTemp, stations.water);
@@ -455,10 +453,32 @@ async function resolveStations(place) {
   ]);
 
   const tide = nearestStation(place, tideStations);
-  const water = nearestStation(place, waterStations);
+  const waterResult = await nearestWaterStationWithUsableReading(place, waterStations);
   if (!tide) throw new Error("No nearby NOAA tide station was found.");
-  if (!water) throw new Error("No nearby NOAA water-temperature station was found.");
-  return { tide, water };
+  if (!waterResult?.station) throw new Error("No nearby NOAA water-temperature station was found.");
+  return { tide, water: waterResult.station, waterTemp: waterResult.reading };
+}
+
+async function nearestWaterStationWithUsableReading(place, stations) {
+  const candidates = stations
+    .map((station) => ({
+      ...station,
+      miles: haversineMiles(place.lat, place.lon, station.lat, station.lon),
+    }))
+    .sort((a, b) => a.miles - b.miles)
+    .slice(0, 12);
+
+  for (const station of candidates) {
+    const reading = await getWaterTemperature(station);
+    if (isPlausibleWaterTemp(reading)) return { station, reading };
+  }
+
+  return { station: candidates[0], reading: null };
+}
+
+function isPlausibleWaterTemp(reading) {
+  const value = Number(reading?.v);
+  return Number.isFinite(value) && value >= 35 && value <= 95;
 }
 
 async function getStations(type) {

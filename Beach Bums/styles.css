@@ -404,6 +404,14 @@ label {
   line-height: 1.1;
 }
 
+.forecast-period {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 850;
+}
+
 .forecast-body p {
   margin: 10px 0 0;
   color: var(--muted);
